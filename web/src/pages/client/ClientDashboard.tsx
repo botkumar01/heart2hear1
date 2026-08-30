@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { ComingSoon } from "../../components/ComingSoon";
 import { EmergencyNotice } from "../../components/BoundaryNotice";
 import { useUserProfile } from "../../hooks/useUserProfile";
+import { Card, CardTitle, CardDescription } from "../../components/ui/Card";
 import { Spinner } from "../../components/ui/States";
 
 export function ClientDashboard() {
@@ -22,16 +24,22 @@ export function ClientDashboard() {
         <Spinner />
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <ComingSoon
-            title="Quick Wellbeing Check"
-            description="A short, friendly check-in that helps route you to the right kind of support."
-            phase="Phase 2"
-          />
-          <ComingSoon
-            title="Talk with Heart2Hear AI"
-            description="A supportive, multilingual AI conversation — not a doctor or therapist."
-            phase="Phase 2"
-          />
+          <Link to="/client/wellbeing-check">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Quick Wellbeing Check</CardTitle>
+              <CardDescription className="mt-1">
+                A short, friendly check-in that helps route you to the right kind of support.
+              </CardDescription>
+            </Card>
+          </Link>
+          <Link to="/client/ai">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Talk with Heart2Hear AI</CardTitle>
+              <CardDescription className="mt-1">
+                A supportive, multilingual AI conversation — not a doctor or therapist.
+              </CardDescription>
+            </Card>
+          </Link>
           <ComingSoon
             title="Find a Helper"
             description="Get matched with a trained active listener based on language and availability."

@@ -5,6 +5,8 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ClientDashboard } from "./pages/client/ClientDashboard";
+import { WellbeingCheckPage } from "./pages/client/WellbeingCheckPage";
+import { AiChatPage } from "./pages/client/AiChatPage";
 import { HelperDashboard } from "./pages/helper/HelperDashboard";
 import { ProfessionalDashboard } from "./pages/professional/ProfessionalDashboard";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -21,6 +23,8 @@ export default function App() {
 
           <Route element={<ProtectedRoute allow={["client"]} />}>
             <Route path="/client" element={<ClientDashboard />} />
+            <Route path="/client/wellbeing-check" element={<WellbeingCheckPage />} />
+            <Route path="/client/ai" element={<AiChatPage />} />
           </Route>
           <Route element={<ProtectedRoute allow={["helper"]} />}>
             <Route path="/helper" element={<HelperDashboard />} />

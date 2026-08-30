@@ -28,13 +28,13 @@ firestore.rules, storage.rules, firebase.json  (Firestore/Storage config only �
 
 ## Phases
 
-**Phase 1 — Foundation** *(current)*
+**Phase 1 — Foundation** *(done)*
 Repo scaffold, design system, landing page, role-aware registration/login with email verification, role-gated dashboards, Firestore rules v1, login-notification email.
-Accounts needed: **Firebase** (done), **Vercel** (now, for the trusted backend), **Resend** (for the login-notification email).
+Accounts needed: **Firebase** (done), **Vercel** (done), **Resend** (for the login-notification email; optional, no-ops without it).
 
-**Phase 2 — Client wellbeing, AI, safety core**
-Wellbeing Check → non-diagnostic routing signal. Shared safety/moderation detector (multilingual: English, Tamil, Hindi). Gemini-backed supportive chatbot behind a Cloud Function, with the guardrail system prompt and safety filtering. Crisis resources panel and support-routing screen.
-Accounts needed: **Gemini API key**.
+**Phase 2 — Client wellbeing, AI, safety core** *(current)*
+Wellbeing Check → non-diagnostic routing signal (`web/api/submitWellbeingAssessment.ts`). Shared safety detector (`web/api/_lib/safety.ts`, multilingual EN/TA/HI keyword patterns) reused by the AI chat now and helper-chat moderation in Phase 3. Gemini-backed supportive chatbot (`web/api/aiChat.ts` + `_lib/gemini.ts`) with the guardrail system prompt, pre-filtering user messages for crisis language before ever calling Gemini, and post-filtering the model's own replies. Crisis resources panel (`web/src/components/SafetyPanel.tsx`, India-first + country-extensible) and a support-routing result screen after the wellbeing check.
+Accounts needed: **Gemini API key** (already have one from the project owner's friend — add it to Vercel env vars if not already there).
 
 **Phase 3 — Helper ecosystem**
 Student vs. general-volunteer registration paths, training modules + quizzes + scenario-based final test, admin manual verification, language/availability matching, Firestore-based private chat replacing Socket.IO, server-side chat moderation reusing Phase 2's safety module, session lifecycle state machine, ratings, milestone certificates.

@@ -36,6 +36,31 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
+    // wellbeingAssessments/{id} — written only by
+    // web/api/submitWellbeingAssessment.ts (Admin SDK bypasses these
+    // rules), so this is read-only from the client, own-assessments-only.
+    match /wellbeingAssessments/{assessmentId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // aiConversations/{uid}/messages/{id} — the AI chat transcript.
+    // Written only by web/api/aiChat.ts so a client can never forge an
+    // "assistant" message or bypass the safety filter; readable only by
+    // its owner for the live chat UI.
+    match /aiConversations/{uid}/messages/{messageId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    // safetyEvents/{id} — admin-only. Never client-writable; never
+    // client-readable either, since it can include a short excerpt of a
+    // flagged message (spec §83: minimize exposure of chat content).
+    match /safetyEvents/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Default-deny everything else. Each later phase adds its own
     // explicit match block above this line — nothing is ever left open
     // by omission.
