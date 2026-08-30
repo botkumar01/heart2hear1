@@ -24,10 +24,10 @@ service cloud.firestore {
     }
 
     // users/{uid} — one profile document per account.
-    // Created and role-stamped only by the trusted backend (Admin SDK
-    // calls bypass these rules entirely), so client-side create/delete
-    // are always denied. Clients may only edit their own non-sensitive
-    // display fields.
+    // Created and role-stamped only by the trusted backend
+    // (web/api/completeRegistration.ts, via the Admin SDK which bypasses
+    // these rules entirely), so client-side create/delete are always
+    // denied. Clients may only edit their own non-sensitive display fields.
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
       allow update: if isOwner(uid)
@@ -58,6 +58,77 @@ service cloud.firestore {
     // flagged message (spec §83: minimize exposure of chat content).
     match /safetyEvents/{eventId} {
       allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // helperTraining/{uid} — a helper's own lesson/quiz progress.
+    // Written only by web/api/submitLessonQuiz.ts and
+    // web/api/submitFinalTest.ts.
+    match /helperTraining/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    // trainingAttempts/{uid}/attempts/{id} — final-test attempt history.
+    // Written only by web/api/submitFinalTest.ts.
+    match /trainingAttempts/{uid}/attempts/{attemptId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    // supportSessions/{id} — a client<->helper session. Readable only by
+    // its two participants (or admin); written only by the trusted
+    // backend so the state machine (spec §54) can't be bypassed or
+    // forged from the client.
+    match /supportSessions/{sessionId} {
+      allow read: if isSignedIn()
+        && (resource.data.clientUid == request.auth.uid
+            || resource.data.helperUid == request.auth.uid
+            || isAdmin());
+      allow write: if false;
+
+      // messages/{id} — readable by the same two participants. A
+      // blocked helper message is stored with blocked:true and a fixed
+      // placeholder string, never the original prohibited text, so
+      // there's nothing extra to protect by hiding it from the client.
+      match /messages/{messageId} {
+        allow read: if isSignedIn()
+          && (get(/databases/$(database)/documents/supportSessions/$(sessionId)).data.clientUid == request.auth.uid
+              || get(/databases/$(database)/documents/supportSessions/$(sessionId)).data.helperUid == request.auth.uid
+              || isAdmin());
+        allow write: if false;
+      }
+    }
+
+    // reviews/{id} — readable by the client who wrote it or the helper
+    // it's about. Written only by web/api/submitHelperReview.ts, which
+    // enforces one review per completed session server-side.
+    match /reviews/{reviewId} {
+      allow read: if isSignedIn()
+        && (resource.data.clientUid == request.auth.uid || resource.data.helperUid == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // certificates/{id} — intentionally public read (spec §37: a
+    // certificate needs a public verification URL/QR code). Written only
+    // by web/api/_lib/certificates.ts.
+    match /certificates/{certificateId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // adminAuditLogs/{id} — admin-only, append-only from the trusted
+    // backend (web/api/_lib/auditLog.ts).
+    match /adminAuditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // reports/{id} — a client/helper filing a concern (spec §56).
+    // Readable by whoever filed it and by admin; never by the person
+    // being reported. Written only by web/api/submitReport.ts.
+    match /reports/{reportId} {
+      allow read: if isSignedIn() && (resource.data.reporterUid == request.auth.uid || isAdmin());
       allow write: if false;
     }
 

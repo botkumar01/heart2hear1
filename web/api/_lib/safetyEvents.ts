@@ -10,7 +10,7 @@ import type { SafetyResult } from "./safety.js";
  */
 export async function logSafetyEvent(params: {
   uid: string;
-  source: "ai_chat" | "wellbeing_assessment";
+  source: "ai_chat" | "wellbeing_assessment" | "helper_chat";
   result: SafetyResult;
   excerpt: string;
   contextId?: string;

@@ -40,11 +40,14 @@ export function ClientDashboard() {
               </CardDescription>
             </Card>
           </Link>
-          <ComingSoon
-            title="Find a Helper"
-            description="Get matched with a trained active listener based on language and availability."
-            phase="Phase 3"
-          />
+          <Link to="/client/helpers">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Find a Helper</CardTitle>
+              <CardDescription className="mt-1">
+                Get matched with a trained active listener based on language and availability.
+              </CardDescription>
+            </Card>
+          </Link>
           <ComingSoon
             title="Find a Professional"
             description="Browse verified psychiatrists and book a consultation."
@@ -55,11 +58,12 @@ export function ClientDashboard() {
             description="Your confirmed professional consultations will appear here."
             phase="Phase 4"
           />
-          <ComingSoon
-            title="Recent sessions"
-            description="A history of your helper and professional sessions."
-            phase="Phase 3"
-          />
+          <Link to="/client/sessions">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Recent sessions</CardTitle>
+              <CardDescription className="mt-1">A history of your helper and professional sessions.</CardDescription>
+            </Card>
+          </Link>
         </div>
       )}
     </AppShell>
