@@ -16,8 +16,15 @@ and how to add them to Vercel for production.
 2. `web/api/generateVideoToken.ts` mints a token for a specific `(appointmentId, userId)` pair,
    only once the appointment is `CONFIRMED` and only within a join window (15 minutes before the
    scheduled time through 60 minutes after) — never a permanent/reusable credential.
-3. `web/src/pages/shared/VideoCallPage.tsx` calls that endpoint, then hands the token to
-   `@zegocloud/zego-uikit-prebuilt`, which renders the actual call UI.
+3. `web/src/pages/shared/VideoCallPage.tsx` calls that endpoint, then wraps the raw token into a
+   **kit token** — `rawToken + "#" + base64(JSON.stringify({userID, roomID, userName, appID}))` —
+   before handing it to `@zegocloud/zego-uikit-prebuilt`. `ZegoUIKitPrebuilt.create()` does **not**
+   accept the raw token004 string on its own; this two-part format is what its own
+   `generateKitTokenForProduction()` builds (confirmed by reading the SDK's bundled source —
+   `node_modules/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js`, searching for
+   `"kitToken error"`, the exact message it logs when there's no `#`). Room/user metadata is
+   attached client-side since it's not secret; the token itself (the part before `#`) is still
+   entirely server-generated.
 4. `ZEGOCLOUD_SERVER_SECRET` never reaches the browser — only the short-lived token does.
 
 ## Adding the credentials to Vercel (production)
