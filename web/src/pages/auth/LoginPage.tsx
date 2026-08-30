@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { httpsCallable } from "firebase/functions";
-import { auth, functions } from "../../lib/firebase";
+import { auth } from "../../lib/firebase";
+import { callApi } from "../../lib/api";
 import { friendlyAuthError } from "../../lib/authErrors";
 import { ROLE_HOME_PATH, type Role } from "../../lib/roles";
 import { Button } from "../../components/ui/Button";
@@ -34,9 +34,7 @@ export function LoginPage() {
       const credential = await signInWithEmailAndPassword(auth, values.email, values.password);
 
       // Best-effort security email — never blocks login if it fails.
-      httpsCallable(functions, "sendLoginNotification")({
-        deviceInfo: navigator.userAgent,
-      }).catch(() => undefined);
+      callApi("sendLoginNotification", { deviceInfo: navigator.userAgent }).catch(() => undefined);
 
       const tokenResult = await credential.user.getIdTokenResult();
       const role = tokenResult.claims.role as Role | undefined;

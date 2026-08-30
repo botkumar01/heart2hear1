@@ -8,8 +8,8 @@ import {
   sendEmailVerification,
   signOut,
 } from "firebase/auth";
-import { httpsCallable } from "firebase/functions";
-import { auth, functions } from "../../lib/firebase";
+import { auth } from "../../lib/firebase";
+import { callApi } from "../../lib/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { friendlyAuthError } from "../../lib/authErrors";
 import { ROLE_HOME_PATH, ROLE_LABELS, SELF_SERVICE_ROLES, type SelfServiceRole } from "../../lib/roles";
@@ -79,7 +79,7 @@ export function RegisterPage() {
     if (role === "helper") payload.helperPath = helperPath;
     if (role === "client" && ageGroup) payload.ageGroup = ageGroup;
 
-    await httpsCallable(functions, "completeRegistration")(payload);
+    await callApi("completeRegistration", payload);
     await refreshRole();
   }
 

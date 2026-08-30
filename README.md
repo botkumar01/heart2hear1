@@ -17,12 +17,16 @@ This repository is a from-scratch rebuild on Firebase. See:
 ## Project layout
 
 ```
-web/            React + Vite + TypeScript + Tailwind frontend
-functions/      Firebase Cloud Functions (TypeScript) — the only place secrets live
+web/            React + Vite + TypeScript + Tailwind frontend, deployed to Vercel
+web/api/        Vercel serverless functions (TypeScript) — the only place secrets live
 contracts/      Hardhat / Solidity (added in Phase 5)
 docs/           Setup guides and architecture docs
-firestore.rules, storage.rules, firebase.json
+firestore.rules, storage.rules, firebase.json  (Firestore/Storage config; Auth + Firestore only — see docs/HEART2HEAR_IMPLEMENTATION_PLAN.md)
 ```
+
+Firebase provides Auth + Firestore (free Spark plan). The trusted backend and hosting live on
+Vercel instead of Firebase Cloud Functions/Hosting — see
+[`docs/HEART2HEAR_IMPLEMENTATION_PLAN.md`](docs/HEART2HEAR_IMPLEMENTATION_PLAN.md) for why.
 
 ## Status
 

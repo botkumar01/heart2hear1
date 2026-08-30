@@ -1,4 +1,5 @@
 import { FirebaseError } from "firebase/app";
+import { ApiRequestError } from "./api";
 
 const MESSAGES: Record<string, string> = {
   "auth/invalid-email": "That email address doesn't look right.",
@@ -16,6 +17,9 @@ const MESSAGES: Record<string, string> = {
 export function friendlyAuthError(error: unknown): string {
   if (error instanceof FirebaseError) {
     return MESSAGES[error.code] ?? "Something went wrong. Please try again.";
+  }
+  if (error instanceof ApiRequestError) {
+    return error.message;
   }
   return "Something went wrong. Please try again.";
 }

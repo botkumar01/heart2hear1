@@ -1,10 +1,9 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
-import { auth, db } from "../lib/firebaseAdmin";
+import { auth, db } from "./_lib/firebaseAdmin";
+import { withAuth } from "./_lib/http";
+import { invalidArgument, failedPrecondition } from "./_lib/errors";
 
-// One schema per self-service role. "admin" is intentionally absent — it is
-// never assignable through this callable, only via manual provisioning.
 const baseSchema = z.object({
   displayName: z.string().trim().min(2, "Name is too short").max(80, "Name is too long"),
   languagePreference: z.enum(["en", "ta", "hi"]).default("en"),
@@ -33,21 +32,17 @@ const requestSchema = z.discriminatedUnion("role", [clientSchema, helperSchema, 
  * Firestore profile document. Refuses to run a second time for the same
  * account, so a client cannot re-invoke it to change its own role.
  */
-export const completeRegistration = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Sign in before completing registration.");
-  }
-
-  const uid = request.auth.uid;
+export default withAuth(async (req, res, decoded) => {
+  const uid = decoded.uid;
   const existingUser = await auth.getUser(uid);
 
   if (existingUser.customClaims?.role) {
-    throw new HttpsError("failed-precondition", "This account already has a role assigned.");
+    throw failedPrecondition("This account already has a role assigned.");
   }
 
-  const parsed = requestSchema.safeParse(request.data);
+  const parsed = requestSchema.safeParse(req.body);
   if (!parsed.success) {
-    throw new HttpsError("invalid-argument", parsed.error.issues.map((issue) => issue.message).join("; "));
+    throw invalidArgument(parsed.error.issues.map((issue) => issue.message).join("; "));
   }
 
   const data = parsed.data;
@@ -84,5 +79,5 @@ export const completeRegistration = onCall(async (request) => {
 
   // The client must force-refresh its ID token after this call so the new
   // role claim takes effect (Firebase caches tokens for up to an hour).
-  return { role: data.role };
+  res.status(200).json({ role: data.role });
 });

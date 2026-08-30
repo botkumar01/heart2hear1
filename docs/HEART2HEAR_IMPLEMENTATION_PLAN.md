@@ -4,27 +4,33 @@ See `HEART2HEAR_AUDIT.md` for the audit of the prior prototype this plan replace
 
 ## Architecture
 
-- **Frontend**: `web/` — React + Vite + TypeScript + Tailwind CSS, deployed to Firebase Hosting. Single-page app; no server rendering, since every page is behind authentication and reads live from Firestore.
-- **Trusted backend**: `functions/` — Firebase Cloud Functions (2nd gen, TypeScript). This is the *only* place secrets live (Gemini key, Razorpay secret, ZEGOCLOUD server secret, blockchain distributor private key, email API key). No standalone Express server — one deploy target, tied to the Firebase project.
-- **Database**: Cloud Firestore only. No MongoDB. Subcollections (e.g. `supportSessions/{id}/messages`) instead of unbounded arrays.
+> **Revised during Phase 1**: the original plan used Firebase Cloud Functions as the trusted
+> backend. Firebase now requires the paid Blaze plan for Cloud Functions and for Storage (Google
+> removed the free tier for both), and the project owner asked to avoid that cost. The trusted
+> backend was moved to **Vercel** instead — Firebase Auth and Firestore stay on the free Spark
+> plan (Admin SDK access to them from an external server is free and unaffected by this), Storage
+> is deferred until it's actually needed (Phase 3/4) and revisited then.
+
+- **Frontend + trusted backend, one platform**: `web/` — React + Vite + TypeScript + Tailwind, deployed to **Vercel**. `web/api/*.ts` are Vercel serverless functions (Node.js) living alongside it — this is the *only* place secrets live (Gemini key, Razorpay secret, ZEGOCLOUD server secret, blockchain distributor private key, email API key, the Firebase service-account key). Same origin as the frontend in both `vercel dev` and production, so no CORS configuration is needed.
+- **Database**: Cloud Firestore only (Spark/free plan). No MongoDB. Subcollections (e.g. `supportSessions/{id}/messages`) instead of unbounded arrays.
 - **Real-time**: Firestore `onSnapshot` listeners for chat, typing indicators, and presence — no Socket.IO.
-- **Auth & roles**: Firebase Authentication (email/password), with `role` (`client | helper | professional | admin`) set as a **custom claim** by a Cloud Function, never trusted from the client. Firestore Security Rules and every Cloud Function check `request.auth.token.role`.
-- **Storage**: Firebase Storage for KYC/verification documents and profile images, locked down by Security Rules — never public.
-- **Blockchain**: `contracts/` — Hardhat + OpenZeppelin, deployed to Ethereum Sepolia testnet. A server-held distributor wallet (Cloud Functions only) executes reward transactions; MetaMask is used client-side only to connect and sign, never to hold platform funds.
+- **Auth & roles**: Firebase Authentication (email/password), with `role` (`client | helper | professional | admin`) set as a **custom claim** by `web/api/completeRegistration.ts` (via firebase-admin, authenticated with a service-account key), never trusted from the client. The frontend calls `web/api/*` with the user's Firebase ID token as a Bearer header; each function verifies it server-side before doing anything. Firestore Security Rules check `request.auth.token.role`.
+- **Storage**: deferred. Firebase Storage now requires Blaze too; when Phase 3/4 needs document/image storage, re-evaluate Firebase Storage (if Blaze is acceptable by then) vs. a free alternative (e.g. Cloudflare R2, Supabase Storage).
+- **Blockchain**: `contracts/` — Hardhat + OpenZeppelin, deployed to Ethereum Sepolia testnet. A server-held distributor wallet (a `web/api/*` function only) executes reward transactions; MetaMask is used client-side only to connect and sign, never to hold platform funds.
 
 ```
-web/            React + Vite + TS + Tailwind
-functions/      auth/ ai/ chat/ payments/ verification/ rewards/ notifications/ safety/
+web/            React + Vite + TS + Tailwind, deployed to Vercel
+web/api/        Vercel serverless functions (Node/TS) — the trusted backend
 contracts/      Hardhat: contracts/, scripts/, test/
 docs/           this plan, audit, and setup guides
-firestore.rules, storage.rules, firebase.json
+firestore.rules, storage.rules, firebase.json  (Firestore/Storage config only — no more Functions/Hosting here)
 ```
 
 ## Phases
 
 **Phase 1 — Foundation** *(current)*
 Repo scaffold, design system, landing page, role-aware registration/login with email verification, role-gated dashboards, Firestore rules v1, login-notification email.
-Accounts needed: **Firebase** (now), **Resend** (for the login-notification email).
+Accounts needed: **Firebase** (done), **Vercel** (now, for the trusted backend), **Resend** (for the login-notification email).
 
 **Phase 2 — Client wellbeing, AI, safety core**
 Wellbeing Check → non-diagnostic routing signal. Shared safety/moderation detector (multilingual: English, Tamil, Hindi). Gemini-backed supportive chatbot behind a Cloud Function, with the guardrail system prompt and safety filtering. Crisis resources panel and support-routing screen.

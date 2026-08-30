@@ -18,6 +18,10 @@ build/
 **/build/
 functions/lib/
 
+# vercel
+.vercel/
+**/.vercel/
+
 # firebase
 .firebase/
 firebase-debug.log
