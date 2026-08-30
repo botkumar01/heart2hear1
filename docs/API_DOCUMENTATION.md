@@ -1,7 +1,10 @@
 # API Documentation
 
-All endpoints are Vercel serverless functions under `web/api/`, routed by filename (e.g.
-`web/api/aiChat.ts` → `POST /api/aiChat`; `web/api/admin/listReports.ts` → `POST /api/admin/listReports`).
+All endpoint URLs below work exactly as their path suggests (e.g. `POST /api/aiChat`,
+`POST /api/admin/listReports`) — but under the hood they're all implemented in
+`web/api/_handlers/` and dispatched through one shared `web/api/[...action].ts` route, not one
+Vercel function per file. See `ARCHITECTURE.md` for why (the Vercel Hobby plan's 12-function
+limit).
 
 **Every endpoint except `razorpayWebhook`** requires `Authorization: Bearer <Firebase ID token>`
 and is `POST`-only, verified by `web/api/_lib/http.ts` before the handler runs — see `ARCHITECTURE.md`.

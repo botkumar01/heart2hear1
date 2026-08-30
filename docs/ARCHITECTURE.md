@@ -86,15 +86,34 @@ web/api/
   _lib/              shared server code: firebaseAdmin, http (auth wrapper), errors, roles,
                       safety (moderation detector), safetyEvents, auditLog, rateLimit,
                       trainingContent, certificates, gemini, zegoToken, blockchain, rewards
-  admin/             admin-only endpoints (role-gated via assertRole)
-  *.ts               one file per endpoint, routed by Vercel to /api/<filename>
+  _handlers/         one file per logical endpoint (mirrors the old flat layout, admin/
+                      endpoints under _handlers/admin/) -- NOT routed by Vercel (the
+                      underscore prefix excludes it, same convention as _lib/)
+  [...action].ts     the one actual routed function for everything above -- dispatches by
+                      URL path to the matching _handlers/ export, so /api/aiChat and
+                      /api/admin/listVerificationQueue work exactly as their filenames
+                      suggest even though neither is a real Vercel function anymore
+  razorpayWebhook.ts the other actual routed function -- kept separate because it needs
+                      raw-body access (bodyParser disabled), incompatible with the shared
+                      JSON-parsed dispatcher
 ```
+
+**Why the indirection**: Vercel's free Hobby plan caps a deployment at **12 Serverless
+Functions**. This project has 39 logical endpoints — one file per endpoint (the original,
+simpler layout) silently exceeded that limit, and every endpoint past the 12th 404'd in
+production despite building and deploying "successfully." `[...action].ts` collapses all 39 into
+one real function; total function count for the whole app is 2 (that plus the webhook). Watch
+for this again if this project ever needs a genuinely different Vercel runtime/config per
+endpoint (the current shared dispatcher assumes every non-webhook endpoint wants the same
+JSON-body, `withAuth`-wrapped treatment).
 
 ## Extending it
 
-- **New endpoint**: add `web/api/yourThing.ts`, default-export `withAuth(async (req, res, decoded) => {...})`,
-  validate `req.body` with `zod`, throw the typed errors from `_lib/errors.ts` for anything that
-  isn't success. It's automatically routed to `/api/yourThing`.
+- **New endpoint**: add `web/api/_handlers/yourThing.ts` (or `_handlers/admin/yourThing.ts`),
+  default-export `withAuth(async (req, res, decoded) => {...})`, validate `req.body` with `zod`,
+  throw the typed errors from `_lib/errors.ts` for anything that isn't success. Then add one
+  import + one registry line to `web/api/[...action].ts` — it won't be reachable until it's in
+  that registry, on purpose (nothing routes by directory listing anymore).
 - **New Firestore collection**: add an explicit `match` block to `firestore.rules` *before* the
   catch-all — nothing is ever implicitly open.
 - **New admin action**: call `logAdminAction()` (`_lib/auditLog.ts`) so it shows up in the audit
