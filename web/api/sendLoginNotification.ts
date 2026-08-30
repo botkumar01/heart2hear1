@@ -1,5 +1,5 @@
-import { auth } from "./_lib/firebaseAdmin";
-import { withAuth } from "./_lib/http";
+import { auth } from "./_lib/firebaseAdmin.js";
+import { withAuth } from "./_lib/http.js";
 
 // Sending domain is a placeholder until a real domain is verified in Resend
 // (see docs/RESEND_SETUP.md).

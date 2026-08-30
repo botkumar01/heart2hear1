@@ -1,8 +1,8 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
-import { auth, db } from "./_lib/firebaseAdmin";
-import { withAuth } from "./_lib/http";
-import { invalidArgument, failedPrecondition } from "./_lib/errors";
+import { auth, db } from "./_lib/firebaseAdmin.js";
+import { withAuth } from "./_lib/http.js";
+import { invalidArgument, failedPrecondition } from "./_lib/errors.js";
 
 const baseSchema = z.object({
   displayName: z.string().trim().min(2, "Name is too short").max(80, "Name is too long"),

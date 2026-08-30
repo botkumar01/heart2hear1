@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { auth } from "./firebaseAdmin";
-import { ApiError, unauthenticated } from "./errors";
+import { auth } from "./firebaseAdmin.js";
+import { ApiError, unauthenticated } from "./errors.js";
 
 type AuthedHandler = (
   req: VercelRequest,
