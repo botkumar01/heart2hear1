@@ -1,5 +1,11 @@
 # Razorpay Setup (professional consultation payments)
 
+**Current status: not configured — bookings auto-confirm without payment.** `bookAppointment.ts`
+checks whether `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` are set; if not, it confirms the
+appointment immediately instead of leaving it at `PENDING_PAYMENT` forever, so the booking →
+video-call flow can be exercised end-to-end before this account exists. The moment those env
+vars are set, real payment gating resumes automatically — no code change needed.
+
 **ACCOUNT REQUIRED: Razorpay**
 
 - **Service**: Razorpay — payment gateway for professional consultation fees.

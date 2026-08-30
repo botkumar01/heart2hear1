@@ -68,14 +68,15 @@ export function ProfessionalDirectoryPage() {
     setBookingSlotId(slotId);
     setError(null);
     try {
-      const { appointmentId } = await callApi<{ appointmentId: string }>("bookAppointment", {
-        professionalUid,
-        slotId,
-      });
+      const { appointmentId, status } = await callApi<{ appointmentId: string; status: "CONFIRMED" | "PENDING_PAYMENT" }>(
+        "bookAppointment",
+        { professionalUid, slotId },
+      );
 
-      if (feeInr === 0) {
-        // Free consultation — nothing to pay, appointment is already
-        // PENDING_PAYMENT though, so still route it through confirmation.
+      if (status === "CONFIRMED" || feeInr === 0) {
+        // Either it's a free consultation, or Razorpay isn't configured
+        // yet and the backend auto-confirmed it (see bookAppointment.ts)
+        // — nothing to pay, go straight to the appointment.
         navigate("/client/appointments");
         return;
       }
