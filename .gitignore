@@ -1,0 +1,45 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# env files - never commit secrets
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+!.env.example
+!**/.env.example
+
+# build output
+dist/
+build/
+**/dist/
+**/build/
+functions/lib/
+
+# firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*-debug.log
+.runtimeconfig.json
+**/.secret.local
+!**/.secret.local.example
+
+# hardhat
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

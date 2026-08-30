@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand palette — off-white base, pastel teal/coral/yellow accents,
+     calm blue for links/secondary actions, charcoal for text. Chosen to
+     read as calm/trustworthy rather than clinical or "generic SaaS". */
+  --color-paper: #fbf7f1;
+  --color-paper-dim: #f4efe6;
+  --color-surface: #ffffff;
+
+  --color-ink: #26231f;
+  --color-ink-muted: #6b655c;
+  --color-ink-faint: #9c9689;
+
+  --color-teal-50: #eef7f5;
+  --color-teal-100: #d7ece7;
+  --color-teal-300: #8fcdc0;
+  --color-teal-500: #2f9e8f;
+  --color-teal-600: #24806f;
+  --color-teal-700: #1c6559;
+
+  --color-blue-100: #dbe7f3;
+  --color-blue-400: #6f97c2;
+  --color-blue-500: #4c7eaf;
+  --color-blue-600: #3a6690;
+
+  --color-coral-100: #fbe2da;
+  --color-coral-300: #f4ab93;
+  --color-coral-500: #ea7a5a;
+  --color-coral-600: #d1603f;
+
+  --color-yellow-100: #fbf0d4;
+  --color-yellow-300: #f2d178;
+  --color-yellow-500: #e0b13f;
+
+  --color-danger-100: #fbe0df;
+  --color-danger-500: #c94f45;
+  --color-danger-600: #a83c34;
+
+  --radius-md: 0.75rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.75rem;
+
+  --shadow-soft: 0 1px 2px rgba(38, 35, 31, 0.04), 0 8px 24px -8px rgba(38, 35, 31, 0.12);
+  --shadow-soft-lg: 0 4px 8px rgba(38, 35, 31, 0.04), 0 16px 40px -12px rgba(38, 35, 31, 0.16);
+
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-teal-500);
+    outline-offset: 2px;
+  }
+}

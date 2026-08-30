@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Nothing is stored yet in Phase 1. Profile images (Phase 1/3) and
+    // verification documents (Phase 3/4) each get their own explicit,
+    // narrowly-scoped path here when that feature is built — never a
+    // broad allow rule opened in advance of the feature that needs it.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

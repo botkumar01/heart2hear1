@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Role comes ONLY from the custom claim set server-side by
+    // functions/src/auth/completeRegistration.ts — never from a
+    // client-writable field. This is the enforcement point for every
+    // role check in these rules.
+    function role() {
+      return isSignedIn() ? request.auth.token.role : null;
+    }
+
+    function isAdmin() {
+      return role() == 'admin';
+    }
+
+    // users/{uid} — one profile document per account.
+    // Created and role-stamped only by the trusted backend (Admin SDK
+    // calls bypass these rules entirely), so client-side create/delete
+    // are always denied. Clients may only edit their own non-sensitive
+    // display fields.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['displayName', 'languagePreference', 'updatedAt']);
+      allow create, delete: if false;
+    }
+
+    // Default-deny everything else. Each later phase adds its own
+    // explicit match block above this line — nothing is ever left open
+    // by omission.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

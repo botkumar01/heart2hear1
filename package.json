@@ -1,0 +1,14 @@
+{
+  "name": "heart2hear",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Heart2Hear — someone to listen, someone to guide, someone to help.",
+  "scripts": {
+    "install:all": "npm install --prefix web && npm install --prefix functions",
+    "dev:web": "npm run dev --prefix web",
+    "build:web": "npm run build --prefix web",
+    "build:functions": "npm run build --prefix functions",
+    "emulators": "npm run build --prefix functions && firebase emulators:start",
+    "deploy": "npm run build:web && npm run build:functions && firebase deploy"
+  }
+}
