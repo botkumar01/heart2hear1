@@ -5,6 +5,7 @@ import { useUserProfile } from "../../hooks/useUserProfile";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardTitle, CardDescription } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
+import { Alert } from "../../components/ui/Alert";
 import { Spinner } from "../../components/ui/States";
 import { callApi } from "../../lib/api";
 import { useState } from "react";
@@ -51,6 +52,33 @@ export function HelperDashboard() {
       <p className="mt-4 rounded-lg bg-paper-dim px-4 py-3 text-sm font-medium text-ink">
         Remember: I am a trained listener, not a doctor.
       </p>
+
+      {!loading && status === "UNDER_REVIEW" && (
+        <div className="mt-4">
+          <Alert tone="info" title="Your application is under review">
+            A Heart2Hear admin is reviewing your details. Once approved, you'll be able to go
+            available and start receiving support requests — there's nothing else to do here in
+            the meantime.
+          </Alert>
+        </div>
+      )}
+
+      {!loading && status === "VERIFICATION_FAILED" && (
+        <div className="mt-4">
+          <Alert tone="danger" title="Your application wasn't approved">
+            Contact Heart2Hear support for details on what to correct and how to reapply.
+          </Alert>
+        </div>
+      )}
+
+      {!loading && status === "SUSPENDED" && (
+        <div className="mt-4">
+          <Alert tone="danger" title="Your account is suspended">
+            This usually follows repeated chat-safety warnings. An admin will review your account;
+            contact support if you believe this is a mistake.
+          </Alert>
+        </div>
+      )}
 
       {loading ? (
         <Spinner />

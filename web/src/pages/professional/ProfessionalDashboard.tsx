@@ -134,10 +134,30 @@ export function ProfessionalDashboard() {
         <BoundaryNotice role="professional" />
       </div>
 
-      {status !== "VERIFIED" && (
-        <p className="mt-4 rounded-lg bg-paper-dim px-4 py-3 text-sm text-ink-muted">
-          You can't accept paid consultations until your credentials are verified.
-        </p>
+      {status === "UNDER_REVIEW" && (
+        <div className="mt-4">
+          <Alert tone="info" title="Your application is under review">
+            A Heart2Hear admin is checking your registration against the official register. Once
+            approved, you'll be able to set availability and accept bookings — there's nothing
+            else to do here in the meantime.
+          </Alert>
+        </div>
+      )}
+
+      {status === "VERIFICATION_FAILED" && (
+        <div className="mt-4">
+          <Alert tone="danger" title="Your application wasn't approved">
+            Contact Heart2Hear support for details on what to correct and how to reapply.
+          </Alert>
+        </div>
+      )}
+
+      {(status === "SUSPENDED" || status === "EXPIRED") && (
+        <div className="mt-4">
+          <Alert tone="danger" title={status === "SUSPENDED" ? "Your account is suspended" : "Your registration has expired"}>
+            Contact Heart2Hear support to resolve this before you can accept bookings again.
+          </Alert>
+        </div>
       )}
 
       {loading ? (

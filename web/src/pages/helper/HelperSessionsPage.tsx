@@ -4,6 +4,7 @@ import { Card, CardTitle, CardDescription } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Spinner, EmptyState } from "../../components/ui/States";
 import { useMySessions } from "../../hooks/useMySessions";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 const STATUS_TONE: Record<string, "teal" | "blue" | "yellow" | "danger" | "neutral"> = {
   REQUESTED: "yellow",
@@ -16,6 +17,8 @@ const STATUS_TONE: Record<string, "teal" | "blue" | "yellow" | "danger" | "neutr
 
 export function HelperSessionsPage() {
   const { sessions, loading } = useMySessions("helper");
+  const { profile } = useUserProfile();
+  const isVerified = profile?.verificationStatus === "VERIFIED";
 
   return (
     <AppShell>
@@ -26,7 +29,14 @@ export function HelperSessionsPage() {
         <Spinner />
       ) : sessions.length === 0 ? (
         <div className="mt-6">
-          <EmptyState title="No sessions yet" description="Turn on availability from your dashboard to start receiving requests." />
+          <EmptyState
+            title="No sessions yet"
+            description={
+              isVerified
+                ? "Turn on availability from your dashboard to start receiving requests."
+                : "You'll be able to receive requests once your account is verified — check your dashboard for status."
+            }
+          />
         </div>
       ) : (
         <div className="mt-6 space-y-3">
