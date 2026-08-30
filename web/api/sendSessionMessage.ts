@@ -5,6 +5,7 @@ import { withAuth } from "./_lib/http.js";
 import { invalidArgument, failedPrecondition, permissionDenied } from "./_lib/errors.js";
 import { classifySafety } from "./_lib/safety.js";
 import { logSafetyEvent } from "./_lib/safetyEvents.js";
+import { enforceRateLimit } from "./_lib/rateLimit.js";
 
 const requestSchema = z.object({
   sessionId: z.string().min(1),
@@ -22,6 +23,8 @@ const VIOLATION_SUSPEND_THRESHOLD = 3;
  * repeated violations auto-suspend the helper and end the session.
  */
 export default withAuth(async (req, res, decoded) => {
+  await enforceRateLimit({ uid: decoded.uid, action: "sendSessionMessage", limit: 60, windowSeconds: 300 });
+
   const parsed = requestSchema.safeParse(req.body);
   if (!parsed.success) {
     throw invalidArgument(parsed.error.issues.map((i) => i.message).join("; "));

@@ -2,7 +2,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { db } from "./firebaseAdmin.js";
 import { sendRewardOnChain, isBlockchainConfigured } from "./blockchain.js";
 
-interface RewardSettings {
+export interface RewardSettings {
   baseRewardTokens: number;
   qualityBonusRatingThreshold: number;
   qualityBonusTokens: number;
@@ -11,7 +11,7 @@ interface RewardSettings {
   dailyRewardCapPerHelper: number;
 }
 
-const DEFAULT_SETTINGS: RewardSettings = {
+export const DEFAULT_REWARD_SETTINGS: RewardSettings = {
   baseRewardTokens: 10,
   qualityBonusRatingThreshold: 5,
   qualityBonusTokens: 5,
@@ -22,7 +22,32 @@ const DEFAULT_SETTINGS: RewardSettings = {
 
 async function getRewardSettings(): Promise<RewardSettings> {
   const snap = await db().collection("platformSettings").doc("rewards").get();
-  return { ...DEFAULT_SETTINGS, ...(snap.data() ?? {}) };
+  return { ...DEFAULT_REWARD_SETTINGS, ...(snap.data() ?? {}) };
+}
+
+/** Pure eligibility check (spec §34) — split out from evaluateHelperSessionReward so it's unit-testable without a Firestore instance. */
+export function isEligibleForReward(params: {
+  helperVerificationStatus: string | undefined;
+  rating: number;
+  durationMinutes: number | null;
+  todaysRewardCount: number;
+  settings: RewardSettings;
+}): boolean {
+  if (params.helperVerificationStatus !== "VERIFIED") return false;
+  if (params.rating < params.settings.minRatingForEligibility) return false;
+  if (params.durationMinutes === null) return false;
+  if (params.durationMinutes < params.settings.minSessionDurationMinutes) return false;
+  if (params.todaysRewardCount >= params.settings.dailyRewardCapPerHelper) return false;
+  return true;
+}
+
+/** Pure amount calculation — base + quality bonus, never message-count-based. */
+export function computeRewardAmount(rating: number, settings: RewardSettings): number {
+  let amount = settings.baseRewardTokens;
+  if (rating >= settings.qualityBonusRatingThreshold) {
+    amount += settings.qualityBonusTokens;
+  }
+  return amount;
 }
 
 /**
@@ -49,14 +74,10 @@ export async function evaluateHelperSessionReward(params: {
   const helper = helperSnap.data();
   if (!session || !helper) return;
 
-  if (helper.verificationStatus !== "VERIFIED") return;
-  if (params.rating < settings.minRatingForEligibility) return;
-
   const acceptedAt = session.acceptedAt as Timestamp | undefined;
   const completedAt = session.completedAt as Timestamp | undefined;
-  if (!acceptedAt || !completedAt) return;
-  const durationMinutes = (completedAt.toMillis() - acceptedAt.toMillis()) / 60_000;
-  if (durationMinutes < settings.minSessionDurationMinutes) return;
+  const durationMinutes =
+    acceptedAt && completedAt ? (completedAt.toMillis() - acceptedAt.toMillis()) / 60_000 : null;
 
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -65,12 +86,17 @@ export async function evaluateHelperSessionReward(params: {
     .where("helperUid", "==", params.helperUid)
     .where("createdAt", ">=", Timestamp.fromDate(startOfDay))
     .get();
-  if (todaysRewards.size >= settings.dailyRewardCapPerHelper) return;
 
-  let amountTokens = settings.baseRewardTokens;
-  if (params.rating >= settings.qualityBonusRatingThreshold) {
-    amountTokens += settings.qualityBonusTokens;
-  }
+  const eligible = isEligibleForReward({
+    helperVerificationStatus: helper.verificationStatus as string | undefined,
+    rating: params.rating,
+    durationMinutes,
+    todaysRewardCount: todaysRewards.size,
+    settings,
+  });
+  if (!eligible) return;
+
+  const amountTokens = computeRewardAmount(params.rating, settings);
 
   const ledgerRef = await db()
     .collection("rewardLedger")

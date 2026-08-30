@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "./_lib/firebaseAdmin.js";
 import { withAuth } from "./_lib/http.js";
 import { invalidArgument, permissionDenied } from "./_lib/errors.js";
+import { enforceRateLimit } from "./_lib/rateLimit.js";
 
 const requestSchema = z.object({
   sessionId: z.string().min(1).optional(),
@@ -21,6 +22,8 @@ const requestSchema = z.object({
 });
 
 export default withAuth(async (req, res, decoded) => {
+  await enforceRateLimit({ uid: decoded.uid, action: "submitReport", limit: 10, windowSeconds: 3600 });
+
   const parsed = requestSchema.safeParse(req.body);
   if (!parsed.success) {
     throw invalidArgument(parsed.error.issues.map((i) => i.message).join("; "));

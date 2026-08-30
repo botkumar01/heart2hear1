@@ -51,6 +51,16 @@ npm run dev
 **EXPECTED RESULT**: Terminal 1 prints an Emulator UI URL (usually `http://localhost:4000`) where
 you can inspect Auth users and Firestore documents created while you use the app.
 
+## Running the tests
+
+```
+npm test
+```
+
+Runs the unit test suite (safety detector, reward eligibility/formula) — see `TESTING.md` for the
+full picture, including Firestore Security Rules tests (`npm run test:rules`, needs Java 21+) and
+the smart contract tests (`npm run test:contracts`).
+
 ## Common issues
 
 | Symptom | Likely cause | Fix |

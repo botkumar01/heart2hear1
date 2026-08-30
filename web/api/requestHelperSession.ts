@@ -4,11 +4,13 @@ import { db } from "./_lib/firebaseAdmin.js";
 import { withAuth } from "./_lib/http.js";
 import { assertRole } from "./_lib/roles.js";
 import { invalidArgument, failedPrecondition } from "./_lib/errors.js";
+import { enforceRateLimit } from "./_lib/rateLimit.js";
 
 const requestSchema = z.object({ helperUid: z.string().min(1) });
 
 export default withAuth(async (req, res, decoded) => {
   assertRole(decoded, "client");
+  await enforceRateLimit({ uid: decoded.uid, action: "requestHelperSession", limit: 10, windowSeconds: 3600 });
 
   const parsed = requestSchema.safeParse(req.body);
   if (!parsed.success) {

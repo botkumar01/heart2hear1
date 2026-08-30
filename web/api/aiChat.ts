@@ -6,6 +6,7 @@ import { invalidArgument } from "./_lib/errors.js";
 import { classifySafety } from "./_lib/safety.js";
 import { logSafetyEvent } from "./_lib/safetyEvents.js";
 import { askGemini } from "./_lib/gemini.js";
+import { enforceRateLimit } from "./_lib/rateLimit.js";
 
 const requestSchema = z.object({
   message: z.string().trim().min(1).max(2000),
@@ -22,6 +23,10 @@ const SAFETY_REPLY: Record<string, string> = {
 const HISTORY_LIMIT = 10;
 
 export default withAuth(async (req, res, decoded) => {
+  // Gemini calls cost money and a runaway client loop shouldn't be able
+  // to rack up an unbounded bill.
+  await enforceRateLimit({ uid: decoded.uid, action: "aiChat", limit: 20, windowSeconds: 300 });
+
   const parsed = requestSchema.safeParse(req.body);
   if (!parsed.success) {
     throw invalidArgument(parsed.error.issues.map((issue) => issue.message).join("; "));

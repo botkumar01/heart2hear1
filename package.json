@@ -9,6 +9,9 @@
     "dev:web": "npm run dev --prefix web",
     "build:web": "npm run build --prefix web",
     "deploy:web": "npm run deploy --prefix web",
-    "deploy:rules": "firebase deploy --only firestore:rules,storage"
+    "deploy:rules": "firebase deploy --only firestore:rules,storage",
+    "test": "npm test --prefix web",
+    "test:rules": "firebase emulators:exec --only firestore \"npm run test:rules --prefix web\"",
+    "test:contracts": "npm test --prefix contracts"
   }
 }

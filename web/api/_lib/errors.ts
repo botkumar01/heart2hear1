@@ -11,3 +11,5 @@ export const invalidArgument = (message: string) => new ApiError(400, message);
 export const failedPrecondition = (message: string) => new ApiError(409, message);
 export const permissionDenied = (message = "You don't have permission to do that.") =>
   new ApiError(403, message);
+export const tooManyRequests = (message = "You're doing that too much — please slow down and try again shortly.") =>
+  new ApiError(429, message);
