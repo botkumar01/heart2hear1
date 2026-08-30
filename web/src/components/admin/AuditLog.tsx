@@ -20,7 +20,7 @@ export function AuditLog() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    callApi<{ items: AuditEntry[] }>("admin/listAuditLogs")
+    callApi<{ items: AuditEntry[] }>("adminListAuditLogs")
       .then((data) => setItems(data.items))
       .catch((err) => setError(err instanceof ApiRequestError ? err.message : "Couldn't load the audit log."))
       .finally(() => setLoading(false));

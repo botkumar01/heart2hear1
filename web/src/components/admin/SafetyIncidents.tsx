@@ -29,7 +29,7 @@ export function SafetyIncidents() {
     setLoading(true);
     setError(null);
     try {
-      const data = await callApi<{ items: SafetyEvent[] }>("admin/listSafetyEvents");
+      const data = await callApi<{ items: SafetyEvent[] }>("adminListSafetyEvents");
       setItems(data.items);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't load safety events.");
@@ -45,7 +45,7 @@ export function SafetyIncidents() {
   async function updateStatus(eventId: string, status: "UNDER_REVIEW" | "RESOLVED") {
     setActingId(eventId);
     try {
-      await callApi("admin/updateSafetyEventStatus", { eventId, status });
+      await callApi("adminUpdateSafetyEventStatus", { eventId, status });
       setItems((prev) => prev.map((i) => (i.id === eventId ? { ...i, status } : i)));
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't update this event.");

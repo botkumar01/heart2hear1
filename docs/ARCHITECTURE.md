@@ -86,13 +86,14 @@ web/api/
   _lib/              shared server code: firebaseAdmin, http (auth wrapper), errors, roles,
                       safety (moderation detector), safetyEvents, auditLog, rateLimit,
                       trainingContent, certificates, gemini, zegoToken, blockchain, rewards
-  _handlers/         one file per logical endpoint (mirrors the old flat layout, admin/
-                      endpoints under _handlers/admin/) -- NOT routed by Vercel (the
-                      underscore prefix excludes it, same convention as _lib/)
-  [...action].ts     the one actual routed function for everything above -- dispatches by
-                      URL path to the matching _handlers/ export, so /api/aiChat and
-                      /api/admin/listVerificationQueue work exactly as their filenames
-                      suggest even though neither is a real Vercel function anymore
+  _handlers/         one file per logical endpoint (admin/ endpoints under _handlers/admin/)
+                      -- NOT routed by Vercel (the underscore prefix excludes it, same
+                      convention as _lib/)
+  [action].ts        the one actual routed function for everything above -- a single dynamic
+                      path segment, dispatching by route name to the matching _handlers/
+                      export. Route names are FLAT, not nested: /api/aiChat and
+                      /api/adminListVerificationQueue (not /api/admin/listVerificationQueue)
+                      -- see the note below on why.
   razorpayWebhook.ts the other actual routed function -- kept separate because it needs
                       raw-body access (bodyParser disabled), incompatible with the shared
                       JSON-parsed dispatcher
@@ -101,19 +102,29 @@ web/api/
 **Why the indirection**: Vercel's free Hobby plan caps a deployment at **12 Serverless
 Functions**. This project has 39 logical endpoints — one file per endpoint (the original,
 simpler layout) silently exceeded that limit, and every endpoint past the 12th 404'd in
-production despite building and deploying "successfully." `[...action].ts` collapses all 39 into
+production despite building and deploying "successfully." `[action].ts` collapses all 39 into
 one real function; total function count for the whole app is 2 (that plus the webhook). Watch
 for this again if this project ever needs a genuinely different Vercel runtime/config per
 endpoint (the current shared dispatcher assumes every non-webhook endpoint wants the same
 JSON-body, `withAuth`-wrapped treatment).
+
+**Why flat route names, not `/api/admin/...`**: the first attempt used `[...action].ts`
+(Next.js's catch-all "spread" syntax) so nested admin routes could keep their `/admin/` prefix.
+That syntax is Next.js-specific and is **not** honored by plain (non-Next.js) Vercel Node
+functions — confirmed live: it named the query param literally `...action` (three dots and all)
+instead of spreading path segments into an array, so nothing ever matched and every route 404'd
+a second time even after the function-count fix. A single `[action].ts` segment only ever
+matches one path component, so admin endpoints are flat, single-segment names instead
+(`adminListReports`, not `admin/listReports`) — see `web/src/lib/api.ts` call sites.
 
 ## Extending it
 
 - **New endpoint**: add `web/api/_handlers/yourThing.ts` (or `_handlers/admin/yourThing.ts`),
   default-export `withAuth(async (req, res, decoded) => {...})`, validate `req.body` with `zod`,
   throw the typed errors from `_lib/errors.ts` for anything that isn't success. Then add one
-  import + one registry line to `web/api/[...action].ts` — it won't be reachable until it's in
-  that registry, on purpose (nothing routes by directory listing anymore).
+  import + one registry line to `web/api/[action].ts`, using a flat route name (prefix admin
+  endpoints with `admin`, e.g. `adminYourThing`) — it won't be reachable until it's in that
+  registry, on purpose (nothing routes by directory listing anymore).
 - **New Firestore collection**: add an explicit `match` block to `firestore.rules` *before* the
   catch-all — nothing is ever implicitly open.
 - **New admin action**: call `logAdminAction()` (`_lib/auditLog.ts`) so it shows up in the audit

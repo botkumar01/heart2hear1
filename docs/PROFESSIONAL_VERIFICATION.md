@@ -21,7 +21,7 @@ it — but as of writing, none exists for either body.
 number, council, qualification, etc.) and **always** routes to admin manual review — there is no
 "auto-approve" path.
 
-`web/api/admin/listVerificationQueue.ts` surfaces, for each pending professional, a direct link to
+`web/api/_handlers/admin/listVerificationQueue.ts` (routed as `/api/adminListVerificationQueue`) surfaces, for each pending professional, a direct link to
 the correct official public register based on which council they selected:
 
 - NMC / State Medical Council → https://www.nmc.org.in/information-desk/indian-medical-register/

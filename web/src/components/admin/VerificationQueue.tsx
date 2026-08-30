@@ -29,7 +29,7 @@ export function VerificationQueue() {
     setLoading(true);
     setError(null);
     try {
-      const data = await callApi<{ items: QueueItem[] }>("admin/listVerificationQueue");
+      const data = await callApi<{ items: QueueItem[] }>("adminListVerificationQueue");
       setItems(data.items);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't load the queue.");
@@ -46,7 +46,7 @@ export function VerificationQueue() {
     setActingUid(targetUid);
     setError(null);
     try {
-      await callApi("admin/reviewVerification", { targetUid, decision });
+      await callApi("adminReviewVerification", { targetUid, decision });
       setItems((prev) => prev.filter((i) => i.uid !== targetUid));
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't submit your decision.");

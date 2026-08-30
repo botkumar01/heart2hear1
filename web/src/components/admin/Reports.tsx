@@ -25,7 +25,7 @@ export function Reports() {
     setLoading(true);
     setError(null);
     try {
-      const data = await callApi<{ items: Report[] }>("admin/listReports");
+      const data = await callApi<{ items: Report[] }>("adminListReports");
       setItems(data.items);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't load reports.");
@@ -41,7 +41,7 @@ export function Reports() {
   async function updateStatus(reportId: string, status: Report["status"]) {
     setActingId(reportId);
     try {
-      await callApi("admin/updateReportStatus", { reportId, status });
+      await callApi("adminUpdateReportStatus", { reportId, status });
       setItems((prev) => prev.map((i) => (i.id === reportId ? { ...i, status } : i)));
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't update this report.");

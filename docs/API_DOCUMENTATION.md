@@ -1,10 +1,11 @@
 # API Documentation
 
-All endpoint URLs below work exactly as their path suggests (e.g. `POST /api/aiChat`,
-`POST /api/admin/listReports`) — but under the hood they're all implemented in
-`web/api/_handlers/` and dispatched through one shared `web/api/[...action].ts` route, not one
-Vercel function per file. See `ARCHITECTURE.md` for why (the Vercel Hobby plan's 12-function
-limit).
+All endpoint URLs below are `POST /api/<name>` using the flat name in each table (e.g.
+`POST /api/aiChat`, `POST /api/adminListReports` — admin endpoints are prefixed `admin`, not
+nested under `/admin/`). Under the hood they're all implemented in `web/api/_handlers/` and
+dispatched through one shared `web/api/[action].ts` route, not one Vercel function per file — see
+`ARCHITECTURE.md` for why (the Vercel Hobby plan's 12-function limit, and why the route names are
+flat rather than nested).
 
 **Every endpoint except `razorpayWebhook`** requires `Authorization: Bearer <Firebase ID token>`
 and is `POST`-only, verified by `web/api/_lib/http.ts` before the handler runs — see `ARCHITECTURE.md`.
@@ -82,8 +83,8 @@ failed precondition, 429 rate-limited, 500 unexpected).
 
 | Endpoint | Purpose |
 |---|---|
-| `admin/listVerificationQueue` / `admin/reviewVerification` | Approve/reject pending helpers and professionals; writes an audit log entry. |
-| `admin/listSafetyEvents` / `admin/updateSafetyEventStatus` | Review flagged crisis/moderation events. |
-| `admin/listReports` / `admin/updateReportStatus` | Review and resolve user-filed reports. |
-| `admin/getPlatformSettings` / `admin/updatePlatformSettings` | Read/write the training pass score and reward formula (never hard-coded). |
-| `admin/listAuditLogs` | Every sensitive admin action, most recent first. |
+| `adminListVerificationQueue` / `adminReviewVerification` | Approve/reject pending helpers and professionals; writes an audit log entry. |
+| `adminListSafetyEvents` / `adminUpdateSafetyEventStatus` | Review flagged crisis/moderation events. |
+| `adminListReports` / `adminUpdateReportStatus` | Review and resolve user-filed reports. |
+| `adminGetPlatformSettings` / `adminUpdatePlatformSettings` | Read/write the training pass score and reward formula (never hard-coded). |
+| `adminListAuditLogs` | Every sensitive admin action, most recent first. |

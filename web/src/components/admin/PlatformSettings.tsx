@@ -26,7 +26,7 @@ export function PlatformSettings() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    callApi<Settings>("admin/getPlatformSettings")
+    callApi<Settings>("adminGetPlatformSettings")
       .then(setSettings)
       .catch((err) => setError(err instanceof ApiRequestError ? err.message : "Couldn't load settings."))
       .finally(() => setLoading(false));
@@ -38,7 +38,7 @@ export function PlatformSettings() {
     setError(null);
     setSaved(false);
     try {
-      await callApi("admin/updatePlatformSettings", settings as unknown as Record<string, unknown>);
+      await callApi("adminUpdatePlatformSettings", settings as unknown as Record<string, unknown>);
       setSaved(true);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "Couldn't save settings.");
