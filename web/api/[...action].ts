@@ -101,7 +101,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const fn = actionPath ? registry[actionPath] : undefined;
 
   if (!fn) {
-    res.status(404).json({ error: "Not found." });
+    // TEMPORARY diagnostics for the routing bug — remove once fixed.
+    res.status(404).json({
+      error: "Not found.",
+      debug: { url: req.url, query: req.query, actionParam, actionPath },
+    });
     return;
   }
 
