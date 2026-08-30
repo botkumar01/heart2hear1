@@ -163,6 +163,36 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // wallets/{uid} — the helper's own linked address (never a key or
+    // seed phrase — see linkWallet.ts). Owner-read only.
+    match /wallets/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    // rewardLedger/{id} — a helper's own reward history. Written only by
+    // web/api/_lib/rewards.ts.
+    match /rewardLedger/{ledgerId} {
+      allow read: if isSignedIn() && (resource.data.helperUid == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // blockchainTransactions/{id} — tx hash + explorer link for a
+    // distributed reward. Written only by web/api/_lib/rewards.ts.
+    match /blockchainTransactions/{txId} {
+      allow read: if isSignedIn() && (resource.data.helperUid == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // platformSettings/{id} — reward formula, training pass score, etc.
+    // Public read (frontend may want to show e.g. the pass score) is
+    // deliberately NOT granted — nothing currently needs it client-side;
+    // admin-only until something does.
+    match /platformSettings/{settingId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Default-deny everything else. Each later phase adds its own
     // explicit match block above this line — nothing is ever left open
     // by omission.

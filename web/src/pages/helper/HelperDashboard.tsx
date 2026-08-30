@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
-import { ComingSoon } from "../../components/ComingSoon";
 import { BoundaryNotice } from "../../components/BoundaryNotice";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { Badge } from "../../components/ui/Badge";
@@ -116,11 +115,12 @@ export function HelperDashboard() {
             </CardDescription>
           </Card>
 
-          <ComingSoon
-            title="Reward balance"
-            description="Connect a wallet and see your Sepolia testnet reward history."
-            phase="Phase 5"
-          />
+          <Link to="/helper/rewards">
+            <Card className="hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Reward balance</CardTitle>
+              <CardDescription className="mt-1">Connect a wallet and see your Sepolia testnet reward history.</CardDescription>
+            </Card>
+          </Link>
         </div>
       )}
     </AppShell>

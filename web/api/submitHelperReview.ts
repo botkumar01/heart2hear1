@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "./_lib/firebaseAdmin.js";
 import { withAuth } from "./_lib/http.js";
 import { invalidArgument, failedPrecondition, permissionDenied } from "./_lib/errors.js";
+import { evaluateHelperSessionReward } from "./_lib/rewards.js";
 
 const requestSchema = z.object({
   sessionId: z.string().min(1),
@@ -20,6 +21,7 @@ export default withAuth(async (req, res, decoded) => {
   const { sessionId, rating, comment, feltHeard, wantsProfessionalSupport } = parsed.data;
 
   const sessionRef = db().collection("supportSessions").doc(sessionId);
+  let helperUid = "";
 
   // Server-computed aggregate rating (spec §32) — done inside a
   // transaction so concurrent reviews can't race each other, and the
@@ -57,7 +59,12 @@ export default withAuth(async (req, res, decoded) => {
 
     tx.set(helperRef, { averageRating: newAvg, ratingCount: newCount }, { merge: true });
     tx.update(sessionRef, { status: "REVIEWED", updatedAt: FieldValue.serverTimestamp() });
+    helperUid = session.helperUid as string;
   });
+
+  await evaluateHelperSessionReward({ sessionId, helperUid, rating }).catch((err) =>
+    console.error("Reward evaluation failed", err),
+  );
 
   res.status(200).json({ status: "REVIEWED" });
 });

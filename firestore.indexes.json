@@ -56,6 +56,22 @@
         { "fieldPath": "professionalUid", "order": "ASCENDING" },
         { "fieldPath": "startTime", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "rewardLedger",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "helperUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "blockchainTransactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "helperUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

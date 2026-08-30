@@ -15,6 +15,7 @@ import { HelperDashboard } from "./pages/helper/HelperDashboard";
 import { TrainingPage } from "./pages/helper/TrainingPage";
 import { StudentVerificationPage } from "./pages/helper/StudentVerificationPage";
 import { HelperSessionsPage } from "./pages/helper/HelperSessionsPage";
+import { RewardsPage } from "./pages/helper/RewardsPage";
 import { SessionChatPage } from "./pages/shared/SessionChatPage";
 import { VideoCallPage } from "./pages/shared/VideoCallPage";
 import { ProfessionalDashboard } from "./pages/professional/ProfessionalDashboard";
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/helper/training" element={<TrainingPage />} />
             <Route path="/helper/student-verification" element={<StudentVerificationPage />} />
             <Route path="/helper/sessions" element={<HelperSessionsPage />} />
+            <Route path="/helper/rewards" element={<RewardsPage />} />
           </Route>
           <Route element={<ProtectedRoute allow={["client", "helper"]} />}>
             <Route path="/session/:sessionId" element={<SessionChatPage />} />
