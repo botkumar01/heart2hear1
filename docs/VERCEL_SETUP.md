@@ -23,14 +23,26 @@ is a real secret and must never reach the browser or git).
 
 **STEPS**:
 1. Click **Generate new private key** → confirm. A `.json` file downloads.
-2. Open that file in a text editor, select all, copy.
-3. Open `web/.env.local` in this repo and paste it as the value of `FIREBASE_SERVICE_ACCOUNT_KEY`
-   — all on one line (it's fine if your editor wraps it visually).
-4. **Delete the downloaded `.json` file** from your Downloads folder once it's pasted in — no
-   need for a second copy lying around outside the (gitignored) `.env.local`.
+2. **Encode it as base64** rather than pasting the raw JSON — a multi-line JSON value with quotes
+   and `\n` escapes is fragile to paste into an env var UI (this bit us once already: a raw-JSON
+   paste crashed the deployed function). Base64 has no special characters, so there's nothing to
+   corrupt.
 
-**EXPECTED RESULT**: `web/.env.local` has a `FIREBASE_SERVICE_ACCOUNT_KEY={...}` line with real
-JSON content, not empty.
+   **WHERE**: Terminal, from the folder the file downloaded to
+
+   **COMMAND** (PowerShell):
+   ```
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("heart2hear-firebase-adminsdk-....json")) | Set-Clipboard
+   ```
+   This reads the file and copies the base64 string straight to your clipboard — nothing to
+   select/trim by hand.
+3. Open `web/.env.local` in this repo and paste it as the value of `FIREBASE_SERVICE_ACCOUNT_KEY`
+   (replace the whole value, it should be one long line of letters/numbers, no `{`, `"`, or spaces).
+4. **Delete the downloaded `.json` file** from your Downloads folder once the base64 is pasted in
+   — no need for a second copy lying around outside the (gitignored) `.env.local`.
+
+**EXPECTED RESULT**: `web/.env.local` has a `FIREBASE_SERVICE_ACCOUNT_KEY=` line followed by a long
+base64 string (starts with `eyJ0eXBlIjoi...`), not empty and not containing `{`.
 
 ## Step 2 — Create your Vercel account
 

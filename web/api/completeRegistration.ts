@@ -34,7 +34,7 @@ const requestSchema = z.discriminatedUnion("role", [clientSchema, helperSchema, 
  */
 export default withAuth(async (req, res, decoded) => {
   const uid = decoded.uid;
-  const existingUser = await auth.getUser(uid);
+  const existingUser = await auth().getUser(uid);
 
   if (existingUser.customClaims?.role) {
     throw failedPrecondition("This account already has a role assigned.");
@@ -47,7 +47,7 @@ export default withAuth(async (req, res, decoded) => {
 
   const data = parsed.data;
 
-  await auth.setCustomUserClaims(uid, { role: data.role });
+  await auth().setCustomUserClaims(uid, { role: data.role });
 
   const profile: Record<string, unknown> = {
     uid,
@@ -75,7 +75,7 @@ export default withAuth(async (req, res, decoded) => {
     profile.verificationStatus = "PENDING";
   }
 
-  await db.collection("users").doc(uid).set(profile, { merge: true });
+  await db().collection("users").doc(uid).set(profile, { merge: true });
 
   // The client must force-refresh its ID token after this call so the new
   // role claim takes effect (Firebase caches tokens for up to an hour).

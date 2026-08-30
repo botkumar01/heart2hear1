@@ -11,7 +11,7 @@ const FROM_ADDRESS = "Heart2Hear <onboarding@resend.dev>";
  * always responds 200 so the frontend never has to handle it as an error.
  */
 export default withAuth(async (req, res, decoded) => {
-  const user = await auth.getUser(decoded.uid);
+  const user = await auth().getUser(decoded.uid);
   if (!user.email || !process.env.RESEND_API_KEY) {
     res.status(200).json({ sent: false });
     return;

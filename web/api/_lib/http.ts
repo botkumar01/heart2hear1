@@ -29,9 +29,16 @@ export function withAuth(handler: AuthedHandler) {
         throw unauthenticated();
       }
 
-      const user = await auth.verifyIdToken(token).catch(() => {
-        throw unauthenticated("Your session has expired. Please sign in again.");
-      });
+      // If auth() itself throws synchronously (e.g. bad FIREBASE_SERVICE_ACCOUNT_KEY),
+      // that skips this .catch() entirely and falls through to the generic 500
+      // below — which is correct: a misconfiguration shouldn't be reported to the
+      // user as "please sign in again".
+      const user = await auth()
+        .verifyIdToken(token)
+        .catch((err) => {
+          console.error("verifyIdToken failed", err);
+          throw unauthenticated("Your session has expired. Please sign in again.");
+        });
 
       await handler(req, res, user);
     } catch (err) {
