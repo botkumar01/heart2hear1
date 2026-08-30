@@ -9,12 +9,17 @@ import { WellbeingCheckPage } from "./pages/client/WellbeingCheckPage";
 import { AiChatPage } from "./pages/client/AiChatPage";
 import { HelperDirectoryPage } from "./pages/client/HelperDirectoryPage";
 import { ClientSessionsPage } from "./pages/client/ClientSessionsPage";
+import { ProfessionalDirectoryPage } from "./pages/client/ProfessionalDirectoryPage";
+import { ClientAppointmentsPage } from "./pages/client/ClientAppointmentsPage";
 import { HelperDashboard } from "./pages/helper/HelperDashboard";
 import { TrainingPage } from "./pages/helper/TrainingPage";
 import { StudentVerificationPage } from "./pages/helper/StudentVerificationPage";
 import { HelperSessionsPage } from "./pages/helper/HelperSessionsPage";
 import { SessionChatPage } from "./pages/shared/SessionChatPage";
+import { VideoCallPage } from "./pages/shared/VideoCallPage";
 import { ProfessionalDashboard } from "./pages/professional/ProfessionalDashboard";
+import { ProfessionalVerificationPage } from "./pages/professional/ProfessionalVerificationPage";
+import { ProfessionalAppointmentsPage } from "./pages/professional/ProfessionalAppointmentsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { CertificateVerificationPage } from "./pages/CertificateVerificationPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -35,6 +40,8 @@ export default function App() {
             <Route path="/client/ai" element={<AiChatPage />} />
             <Route path="/client/helpers" element={<HelperDirectoryPage />} />
             <Route path="/client/sessions" element={<ClientSessionsPage />} />
+            <Route path="/client/professionals" element={<ProfessionalDirectoryPage />} />
+            <Route path="/client/appointments" element={<ClientAppointmentsPage />} />
           </Route>
           <Route element={<ProtectedRoute allow={["helper"]} />}>
             <Route path="/helper" element={<HelperDashboard />} />
@@ -47,6 +54,11 @@ export default function App() {
           </Route>
           <Route element={<ProtectedRoute allow={["professional"]} />}>
             <Route path="/professional" element={<ProfessionalDashboard />} />
+            <Route path="/professional/verification" element={<ProfessionalVerificationPage />} />
+            <Route path="/professional/appointments" element={<ProfessionalAppointmentsPage />} />
+          </Route>
+          <Route element={<ProtectedRoute allow={["client", "professional"]} />}>
+            <Route path="/appointments/:appointmentId/call" element={<VideoCallPage />} />
           </Route>
           <Route element={<ProtectedRoute allow={["admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />

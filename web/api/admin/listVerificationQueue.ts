@@ -2,6 +2,11 @@ import { db } from "../_lib/firebaseAdmin.js";
 import { withAuth } from "../_lib/http.js";
 import { assertRole } from "../_lib/roles.js";
 
+const OFFICIAL_REGISTER_URL: Record<string, string> = {
+  NMC_STATE_MEDICAL_COUNCIL: "https://www.nmc.org.in/information-desk/indian-medical-register/",
+  RCI: "https://rehabcouncil.nic.in/",
+};
+
 /**
  * File lives at web/api/admin/listVerificationQueue.ts -> route
  * /api/admin/listVerificationQueue (Vercel mirrors the directory
@@ -18,6 +23,7 @@ export default withAuth(async (_req, res, decoded) => {
 
   const items = snap.docs.map((doc) => {
     const data = doc.data();
+    const council = data.professionalVerification?.registrationCouncil as string | undefined;
     return {
       uid: doc.id,
       role: data.role,
@@ -28,6 +34,7 @@ export default withAuth(async (_req, res, decoded) => {
       trainingCompleted: data.trainingCompleted ?? null,
       testPassed: data.testPassed ?? null,
       professionalVerification: data.professionalVerification ?? null,
+      officialRegisterUrl: council ? (OFFICIAL_REGISTER_URL[council] ?? null) : null,
     };
   });
 

@@ -9,11 +9,14 @@ export function ReviewModal({
   open,
   onClose,
   sessionId,
+  kind = "helper",
   onSubmitted,
 }: {
   open: boolean;
   onClose: () => void;
   sessionId: string;
+  /** "helper" reviews a support session; "professional" reviews a paid appointment. */
+  kind?: "helper" | "professional";
   onSubmitted?: () => void;
 }) {
   const [rating, setRating] = useState(0);
@@ -28,13 +31,21 @@ export function ReviewModal({
     setSubmitting(true);
     setError(null);
     try {
-      await callApi("submitHelperReview", {
-        sessionId,
-        rating,
-        comment: comment.trim() || undefined,
-        feltHeard: feltHeard ?? undefined,
-        wantsProfessionalSupport: wantsProfessional ?? undefined,
-      });
+      if (kind === "professional") {
+        await callApi("submitProfessionalReview", {
+          appointmentId: sessionId,
+          rating,
+          comment: comment.trim() || undefined,
+        });
+      } else {
+        await callApi("submitHelperReview", {
+          sessionId,
+          rating,
+          comment: comment.trim() || undefined,
+          feltHeard: feltHeard ?? undefined,
+          wantsProfessionalSupport: wantsProfessional ?? undefined,
+        });
+      }
       onSubmitted?.();
       onClose();
     } catch (err) {
@@ -63,51 +74,55 @@ export function ReviewModal({
           ))}
         </div>
 
-        <div>
-          <p className="text-sm font-medium text-ink">Did you feel heard?</p>
-          <div className="mt-1 flex gap-2">
-            {[
-              { v: true, label: "Yes" },
-              { v: false, label: "Not really" },
-            ].map((opt) => (
-              <button
-                key={String(opt.v)}
-                type="button"
-                onClick={() => setFeltHeard(opt.v)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm",
-                  feltHeard === opt.v ? "border-teal-500 bg-teal-500 text-white" : "border-ink/15 text-ink-muted",
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {kind === "helper" && (
+          <>
+            <div>
+              <p className="text-sm font-medium text-ink">Did you feel heard?</p>
+              <div className="mt-1 flex gap-2">
+                {[
+                  { v: true, label: "Yes" },
+                  { v: false, label: "Not really" },
+                ].map((opt) => (
+                  <button
+                    key={String(opt.v)}
+                    type="button"
+                    onClick={() => setFeltHeard(opt.v)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-sm",
+                      feltHeard === opt.v ? "border-teal-500 bg-teal-500 text-white" : "border-ink/15 text-ink-muted",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div>
-          <p className="text-sm font-medium text-ink">Would you like professional support?</p>
-          <div className="mt-1 flex gap-2">
-            {[
-              { v: true, label: "Yes" },
-              { v: false, label: "No, this was enough" },
-            ].map((opt) => (
-              <button
-                key={String(opt.v)}
-                type="button"
-                onClick={() => setWantsProfessional(opt.v)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm",
-                  wantsProfessional === opt.v
-                    ? "border-teal-500 bg-teal-500 text-white"
-                    : "border-ink/15 text-ink-muted",
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+            <div>
+              <p className="text-sm font-medium text-ink">Would you like professional support?</p>
+              <div className="mt-1 flex gap-2">
+                {[
+                  { v: true, label: "Yes" },
+                  { v: false, label: "No, this was enough" },
+                ].map((opt) => (
+                  <button
+                    key={String(opt.v)}
+                    type="button"
+                    onClick={() => setWantsProfessional(opt.v)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-sm",
+                      wantsProfessional === opt.v
+                        ? "border-teal-500 bg-teal-500 text-white"
+                        : "border-ink/15 text-ink-muted",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         <textarea
           className="w-full rounded-md border border-ink/15 bg-surface px-3 py-2.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"

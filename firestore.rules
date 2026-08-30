@@ -100,12 +100,43 @@ service cloud.firestore {
       }
     }
 
-    // reviews/{id} — readable by the client who wrote it or the helper
-    // it's about. Written only by web/api/submitHelperReview.ts, which
-    // enforces one review per completed session server-side.
+    // reviews/{id} — readable by the client who wrote it, or the
+    // helper/professional it's about. Written only by
+    // web/api/submitHelperReview.ts and submitProfessionalReview.ts,
+    // both of which enforce one review per completed session/appointment
+    // server-side.
     match /reviews/{reviewId} {
       allow read: if isSignedIn()
-        && (resource.data.clientUid == request.auth.uid || resource.data.helperUid == request.auth.uid || isAdmin());
+        && (resource.data.clientUid == request.auth.uid
+            || resource.data.helperUid == request.auth.uid
+            || resource.data.professionalUid == request.auth.uid
+            || isAdmin());
+      allow write: if false;
+    }
+
+    // professionals/{uid}/availabilitySlots/{id} — read/written only via
+    // the trusted backend (getProfessionalSlots.ts / addAvailabilitySlot.ts
+    // / bookAppointment.ts) so slot booking stays race-safe; no direct
+    // client access needed.
+    match /professionals/{uid}/availabilitySlots/{slotId} {
+      allow read, write: if false;
+    }
+
+    // appointments/{id} — readable by its client, its professional, or
+    // admin. Written only by the trusted backend (bookAppointment.ts,
+    // razorpayWebhook.ts, completeAppointment.ts, ...).
+    match /appointments/{appointmentId} {
+      allow read: if isSignedIn()
+        && (resource.data.clientUid == request.auth.uid
+            || resource.data.professionalUid == request.auth.uid
+            || isAdmin());
+      allow write: if false;
+    }
+
+    // payments/{id} — admin-only. Payment status is surfaced to users via
+    // the appointment doc, not this collection directly.
+    match /payments/{paymentId} {
+      allow read: if isAdmin();
       allow write: if false;
     }
 

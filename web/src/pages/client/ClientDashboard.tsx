@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
-import { ComingSoon } from "../../components/ComingSoon";
 import { EmergencyNotice } from "../../components/BoundaryNotice";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { Card, CardTitle, CardDescription } from "../../components/ui/Card";
@@ -48,16 +47,18 @@ export function ClientDashboard() {
               </CardDescription>
             </Card>
           </Link>
-          <ComingSoon
-            title="Find a Professional"
-            description="Browse verified psychiatrists and book a consultation."
-            phase="Phase 4"
-          />
-          <ComingSoon
-            title="Upcoming appointments"
-            description="Your confirmed professional consultations will appear here."
-            phase="Phase 4"
-          />
+          <Link to="/client/professionals">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Find a Professional</CardTitle>
+              <CardDescription className="mt-1">Browse verified psychiatrists and book a consultation.</CardDescription>
+            </Card>
+          </Link>
+          <Link to="/client/appointments">
+            <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
+              <CardTitle>Upcoming appointments</CardTitle>
+              <CardDescription className="mt-1">Your confirmed professional consultations.</CardDescription>
+            </Card>
+          </Link>
           <Link to="/client/sessions">
             <Card className="cursor-pointer hover:shadow-[var(--shadow-soft-lg)]">
               <CardTitle>Recent sessions</CardTitle>

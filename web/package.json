@@ -14,6 +14,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@zegocloud/zego-uikit-prebuilt": "^2.18.3",
     "clsx": "^2.1.1",
     "firebase": "^12.18.0",
     "firebase-admin": "^14.3.0",
